@@ -1,0 +1,26 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "User profile with synchronized token balance and account details",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "Google Auth UID" },
+        "email": { "type": "string", "description": "User Google email address" },
+        "displayName": { "type": "string", "description": "User full name" },
+        "photoURL": { "type": "string", "description": "User profile avatar URL" },
+        "tokenBalance": { "type": "number", "description": "Available Grokson token balance" },
+        "createdAt": { "type": "string", "description": "ISO timestamp of account creation" },
+        "lastActiveAt": { "type": "string", "description": "ISO timestamp of last activity" }
+      },
+      "required": ["uid", "email", "tokenBalance"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "Stores individual user profile and token balance"
+    }
+  }
+}

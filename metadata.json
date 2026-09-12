@@ -1,0 +1,6 @@
+{
+  "name": "GROKSON",
+  "description": "GROKSON — минималистичный футуристичный ИИ-ассистент с молниеносной генерацией ответов.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
