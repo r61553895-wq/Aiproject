@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Key, Sliders, MessageSquare, RotateCcw, Check, Zap } from 'lucide-react';
+import { X, Key, Sliders, MessageSquare, RotateCcw, Check, Zap, Globe } from 'lucide-react';
 import { AppSettings, GigaChatModel } from '../types';
 import { GroksonIcon } from './GroksonLogo';
 import { getModelTier, KNOWN_MODEL_TIERS } from '../utils/modelRates';
@@ -215,6 +215,27 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               {localSettings.customAuthKey
                 ? 'Активен пользовательский ключ авторизации'
                 : 'Используется предустановленный ключ сервера'}
+            </p>
+          </div>
+
+          {/* Custom API Base URL (for GitHub Pages / static hosting) */}
+          <div className="space-y-1.5">
+            <div className="flex items-center gap-1.5">
+              <Globe className="w-3.5 h-3.5 text-neutral-400" />
+              <label className="text-xs font-mono uppercase tracking-wider text-neutral-300">
+                URL сервера API (для GitHub Pages)
+              </label>
+            </div>
+            <input
+              id="settings-api-url"
+              type="text"
+              value={localSettings.customApiUrl || ''}
+              onChange={(e) => setLocalSettings({ ...localSettings, customApiUrl: e.target.value })}
+              placeholder="По умолчанию: текущий хост (оставьте пустым)"
+              className="w-full bg-black border border-neutral-800 rounded-xl px-3 py-2.5 text-white placeholder-neutral-400 focus:outline-none focus:border-neutral-600 font-mono text-xs"
+            />
+            <p className="text-[11px] font-mono text-neutral-400 leading-relaxed">
+              GitHub Pages не запускает Node.js бэкенд. Если сайт размещен на github.io, укажите адрес вашего бэкенда или опубликуйте сайт целиком через Google Cloud Run.
             </p>
           </div>
 

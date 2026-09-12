@@ -174,16 +174,16 @@ export default function App() {
     }
   }, [settings]);
 
-  // Load models on mount or when custom key changes
+  // Load models on mount or when custom key or api url changes
   useEffect(() => {
-    fetchModels(settings.customAuthKey)
+    fetchModels(settings.customAuthKey, settings.customApiUrl)
       .then((data) => {
         if (data && data.length > 0) {
           setModels(data);
         }
       })
       .catch((e) => console.warn('Could not load models list:', e));
-  }, [settings.customAuthKey]);
+  }, [settings.customAuthKey, settings.customApiUrl]);
 
   // Active session
   const activeSession =
@@ -328,6 +328,7 @@ export default function App() {
       temperature: settings.temperature,
       system: settings.systemPrompt || undefined,
       customAuthKey: settings.customAuthKey || undefined,
+      customApiUrl: settings.customApiUrl || undefined,
       signal: controller.signal,
       onChunk: (delta: string) => {
         setSessions((prev) =>
@@ -632,6 +633,7 @@ export default function App() {
         isOpen={isBalanceOpen}
         onClose={() => setIsBalanceOpen(false)}
         customAuthKey={settings.customAuthKey}
+        customApiUrl={settings.customApiUrl}
       />
 
       {/* Donate & Token Top-Up Modal */}

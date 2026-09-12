@@ -1,12 +1,30 @@
 import { ChatMessage, GigaChatModel, BalanceItem } from '../types';
 
-export async function fetchModels(customAuthKey?: string): Promise<GigaChatModel[]> {
+export function getBaseApiUrl(customApiUrl?: string): string {
+  if (customApiUrl && customApiUrl.trim()) {
+    return customApiUrl.trim().replace(/\/+$/, '');
+  }
+  return '';
+}
+
+function cleanErrorMessage(raw: string, status: number): string {
+  if (status === 404) {
+    return 'Сервер API недоступен (404). Хостинг GitHub Pages является статическим и не запускает сервер Node.js. Чтобы бот отвечал всем без VPN/прокси, разверните проект на Cloud Run (кнопка Deploy в AI Studio) или укажите URL бэкенда в настройках.';
+  }
+  if (raw.includes('<!DOCTYPE') || raw.includes('<html') || raw.includes('404 Not Found')) {
+    return 'Ошибка связи с сервером API. Проверьте подключение к бэкенду.';
+  }
+  return raw.slice(0, 350);
+}
+
+export async function fetchModels(customAuthKey?: string, customApiUrl?: string): Promise<GigaChatModel[]> {
   try {
     const headers: Record<string, string> = {};
     if (customAuthKey?.trim()) {
       headers['x-gigachat-key'] = customAuthKey.trim();
     }
-    const res = await fetch('/api/models', { headers });
+    const baseUrl = getBaseApiUrl(customApiUrl);
+    const res = await fetch(`${baseUrl}/api/models`, { headers });
     if (!res.ok) throw new Error('Ошибка получения списка моделей');
     const data = await res.json();
     return data.models || [];
@@ -14,19 +32,21 @@ export async function fetchModels(customAuthKey?: string): Promise<GigaChatModel
     console.warn('Fallback to standard models list:', err);
     return [
       { id: 'GigaChat', description: 'Базовая универсальная модель' },
+      { id: 'GigaChat-Plus', description: 'Сбалансированная модель с увеличенным контекстом' },
       { id: 'GigaChat-Pro', description: 'Продвинутая модель для сложных рассуждений' },
       { id: 'GigaChat-Max', description: 'Флагманская модель максимальной мощности' },
     ];
   }
 }
 
-export async function fetchBalance(customAuthKey?: string): Promise<BalanceItem[]> {
+export async function fetchBalance(customAuthKey?: string, customApiUrl?: string): Promise<BalanceItem[]> {
   try {
     const headers: Record<string, string> = {};
     if (customAuthKey?.trim()) {
       headers['x-gigachat-key'] = customAuthKey.trim();
     }
-    const res = await fetch('/api/balance', { headers });
+    const baseUrl = getBaseApiUrl(customApiUrl);
+    const res = await fetch(`${baseUrl}/api/balance`, { headers });
     if (!res.ok) throw new Error('Ошибка получения баланса');
     const data = await res.json();
     return data.balance || [];
@@ -42,6 +62,7 @@ export interface StreamChatOptions {
   temperature: number;
   system?: string;
   customAuthKey?: string;
+  customApiUrl?: string;
   signal?: AbortSignal;
   onChunk: (delta: string) => void;
   onError: (error: string) => void;
@@ -54,6 +75,7 @@ export async function streamChatCompletion({
   temperature,
   system,
   customAuthKey,
+  customApiUrl,
   signal,
   onChunk,
   onError,
@@ -67,7 +89,8 @@ export async function streamChatCompletion({
       headers['x-gigachat-key'] = customAuthKey.trim();
     }
 
-    const response = await fetch('/api/chat', {
+    const baseUrl = getBaseApiUrl(customApiUrl);
+    const response = await fetch(`${baseUrl}/api/chat`, {
       method: 'POST',
       headers,
       body: JSON.stringify({
@@ -86,7 +109,8 @@ export async function streamChatCompletion({
         const errJson = await response.json();
         errText = errJson.error || errText;
       } catch {
-        errText = (await response.text()) || errText;
+        const raw = await response.text();
+        errText = cleanErrorMessage(raw, response.status);
       }
       onError(errText);
       return;

@@ -9,12 +9,14 @@ interface BalanceModalProps {
   isOpen: boolean;
   onClose: () => void;
   customAuthKey?: string;
+  customApiUrl?: string;
 }
 
 export const BalanceModal: React.FC<BalanceModalProps> = ({
   isOpen,
   onClose,
   customAuthKey,
+  customApiUrl,
 }) => {
   const [balance, setBalance] = useState<BalanceItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -24,7 +26,7 @@ export const BalanceModal: React.FC<BalanceModalProps> = ({
     setIsLoading(true);
     setError(null);
     try {
-      const data = await fetchBalance(customAuthKey);
+      const data = await fetchBalance(customAuthKey, customApiUrl);
       setBalance(data);
     } catch (err: any) {
       setError(err.message || 'Не удалось загрузить данные баланса');
@@ -37,7 +39,7 @@ export const BalanceModal: React.FC<BalanceModalProps> = ({
     if (isOpen) {
       loadBalance();
     }
-  }, [isOpen, customAuthKey]);
+  }, [isOpen, customAuthKey, customApiUrl]);
 
   if (!isOpen) return null;
 

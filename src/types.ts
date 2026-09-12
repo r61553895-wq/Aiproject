@@ -40,6 +40,7 @@ export interface AppSettings {
   temperature: number;
   systemPrompt: string;
   customAuthKey: string;
+  customApiUrl?: string;
 }
 
 export interface UserTokenState {
